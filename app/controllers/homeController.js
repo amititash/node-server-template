@@ -4,7 +4,15 @@ var controller = require('./controller');
   Support for the hello-world route
 */
 function hello(req, res, next) {
-	controller.sendNext(req, res, next, undefined, {hello:'world'})
+
+  var input = req.params.msg;
+
+  var data = {
+
+    "response":input
+  };
+  console.log(input);
+	controller.sendNext(req, res, next, undefined, data)
 }
 
 
@@ -29,7 +37,7 @@ function oops(req, res, next) {
 */
 module.exports.routes = function routes() {
   return [
-    {method:'get', path:'/home/hello', action:hello, role:'guest'},
+    {method:'get', path:'/home/hello/:msg', action:hello, role:'guest'},
     {method:'get', path:'/home/status', action:status, role:'guest'},
     {method:'get', path:'/home/oops', action:oops, role:'guest'}
   ]

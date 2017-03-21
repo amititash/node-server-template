@@ -4,7 +4,7 @@ module.exports.Server = Server;
 
 // ===== Command Line =============================================================================
 
-var port = 3000;
+var port = 7000;
 var usage = ''
   + 'Usage: app.js [options]'
   + '\n'
