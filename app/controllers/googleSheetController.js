@@ -7,23 +7,36 @@ var async = require('async');
 
 var jsonfile = require('jsonfile');
 
-// Type 2: Persistent datastore with manual loading
-var Datastore = require('nedb'),
-    db = new Datastore({
-        filename: './db/datafile.db',
-        autoload: true
-    });
-db.loadDatabase(function(err) { // Callback is optional
-    // Now commands will be executed
-});
 
-exports.db = db;
+// Type 2: Persistent datastore with manual loading
+var Datastore = require('nedb');
+ 
+
+//exports.db = db;
 
 /**
  * 
  * conncet to the sheer from backend
  */
 function fetchJSON(req, res, next) {
+
+  /**
+   * 
+   * initialising db based on month
+   */
+
+  var startMonth = req.params.stm;
+  var dbPathName = './db/'+startMonth;
+
+    var db = new Datastore({
+        filename: dbPathName,
+        autoload: true
+    });
+    db.loadDatabase(function(err) { // Callback is optional
+        // Now commands will be executed
+        console.log("db loaded with path ", dbPathName);
+    });
+
 
     console.log("entering async");
 
@@ -60,7 +73,9 @@ function fetchJSON(req, res, next) {
             }, function(err, rows) {
                 console.log('Read ' + rows.length + ' rows');
 
-                var startMonth = rows[0].datevaleur.split("/")[1];
+                //var startMonth = rows[0].datevaleur.split("/")[1];
+                console.log("starting month is ",startMonth);
+
                 var count = 0;
                 var lastMonth = 0;
                 var dictPositives = [];
@@ -136,7 +151,7 @@ function fetchJSON(req, res, next) {
 
     ]);
 
-    res.end();
+    res.json({status: "db created"});
 
 }
 
@@ -147,7 +162,7 @@ function fetchJSON(req, res, next) {
 module.exports.routes = function routes() {
     return [{
         method: 'get',
-        path: '/googlesheet',
+        path: '/googlesheet/:stm',
         action: fetchJSON,
         role: 'guest'
     }]
