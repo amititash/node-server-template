@@ -64,6 +64,7 @@ function fetchJSON(req, res, next) {
                 step();
             });
         },
+        
         function workingWithRows(step) {
             // google provides some query options
 
@@ -71,7 +72,28 @@ function fetchJSON(req, res, next) {
                 offset: 1,
                 limit: 1000
             }, function(err, rows) {
-                console.log('Read ' + rows.length + ' rows');
+
+                //finding exactly which row to start from 
+                var month = 0;
+                var startRowNum = 0;
+                for (var i=0;i<rows.length;) 
+                {
+
+                  month = rows[i].datevaleur.split("/")[1];
+                  console.log("month is ", month);
+
+                  if(month === startMonth)
+                  {
+                    startRowNum = i;
+                    //break;
+                  }
+
+                  i++;
+
+                }
+
+
+                console.log('starRowNum ' + startRowNum + ' rows');
 
                 //var startMonth = rows[0].datevaleur.split("/")[1];
                 console.log("starting month is ",startMonth);
@@ -82,14 +104,15 @@ function fetchJSON(req, res, next) {
                 var dictNegatives = [];
 
                 //rows.forEach(function(row){
-                for (var i=0;i<rows.length;i++) {
+                for (var i=startRowNum;i<rows.length;) {
 
                     var currMonth = rows[i].datevaleur.split("/")[1];
 
                     //console.log("+++ ", currMonth,lastMonth);
-                    if (currMonth > lastMonth && (lastMonth != 0 || lastMonth == 12)) {
+                    if (currMonth > lastMonth && (lastMonth != 0 || lastMonth == 12)) 
+                    {
                         count++;
-                        //console.log("**********************************************", row.datevaleur);
+                        //console.log("**********************************************", row[i].datevaleur);
 
                     }
 
@@ -122,7 +145,7 @@ function fetchJSON(req, res, next) {
 
                     lastMonth = rows[i].datevaleur.split("/")[1];
 
-                    if (count == 3) {
+                    if (count == 4) {
 
 
 
@@ -131,7 +154,7 @@ function fetchJSON(req, res, next) {
                             console.log(posDoc);
                             db.insert(dictNegatives, function(err, newDoc) {
                                 // Callback is optional
-                                console.log(newDoc);
+                                console.log("inserted document");
 
                             });
 
@@ -140,6 +163,8 @@ function fetchJSON(req, res, next) {
                         break;
 
                     }
+
+                    i++;
 
                 };
 

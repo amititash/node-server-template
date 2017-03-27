@@ -21,6 +21,8 @@ function addRTran(req, res, next)
    var totalBTrans = 0;
    var totalCTrans = 0;
    var totalHTrans = 0;
+   var totalSalary = 0;
+
 
    var finalRes = [];
 
@@ -30,18 +32,18 @@ function addRTran(req, res, next)
         // docs is an array containing documents Mars, Earth, Jupiter
         // If no document is found, docs is equal to []
 
-           console.log("here");
+           console.log("r trans search");
 
             ASYNC.forEachSeries(docs, function(doc, callback) {
                 //doThis(row.axn, row.dnq, row.bgq, callback);
-                console.log(doc);
+                console.log(doc.category);
                 totalRTrans = totalRTrans + Math.abs(doc.amount);
                 callback();
             }, function(err) {
                 // All done
                 console.log(err);
                 
-                    finalRes.push({r_transactions: totalRTrans});
+                    finalRes["r_transactions"] = totalRTrans;
 
                     //second loop
                    thisDB.find({ category: "S_trans" }, function (err, docs) 
@@ -53,13 +55,14 @@ function addRTran(req, res, next)
                            
                             ASYNC.forEachSeries(docs, function(doc, callback) {
                                 //doThis(row.axn, row.dnq, row.bgq, callback);
-                                console.log(doc);
+                                console.log(doc.category);
+
                                 totalSTrans = totalSTrans + Math.abs(doc.amount);
                                 callback();
                             }, function(err) {
                                 // All done
                                 console.log(err);
-                                     finalRes.push({s_transactions: totalSTrans});
+                                     finalRes["s_transactions"] = totalSTrans;
                                      //third loop
                                    thisDB.find({ category: "B_trans" }, function (err, docs) 
                                     {
@@ -70,13 +73,14 @@ function addRTran(req, res, next)
 
                                             ASYNC.forEachSeries(docs, function(doc, callback) {
                                                 //doThis(row.axn, row.dnq, row.bgq, callback);
-                                                console.log(doc);
+                                               console.log(doc.category);
+
                                                 totalBTrans = totalBTrans + Math.abs(doc.amount);
                                                 callback();
                                             }, function(err) {
                                                 // All done
                                                 console.log(err);
-                                                         finalRes.push({b_transactions: totalBTrans});
+                                                         finalRes["b_transactions"] = totalBTrans;
                                                         //fourth loop
                                                        thisDB.find({ category: "C_trans" }, function (err, docs) 
                                                         {
@@ -87,13 +91,13 @@ function addRTran(req, res, next)
 
                                                                 ASYNC.forEachSeries(docs, function(doc, callback) {
                                                                     //doThis(row.axn, row.dnq, row.bgq, callback);
-                                                                    console.log(doc);
+                                                                   console.log(doc.category);
                                                                     totalCTrans = totalCTrans + Math.abs(doc.amount);
                                                                     callback();
                                                                 }, function(err) {
                                                                     // All done
                                                                     console.log(err);
-                                                                             finalRes.push({c_transactions: totalCTrans});
+                                                                             finalRes["c_transactions"] = totalCTrans;
                                                                             //third loop
                                                                            thisDB.find({ category: "H_trans" }, function (err, docs) 
                                                                             {
@@ -104,14 +108,54 @@ function addRTran(req, res, next)
 
                                                                                     ASYNC.forEachSeries(docs, function(doc, callback) {
                                                                                         //doThis(row.axn, row.dnq, row.bgq, callback);
-                                                                                        console.log(doc);
+                                                                                       console.log(doc.category);
+
                                                                                         totalHTrans = totalHTrans + Math.abs(doc.amount);
                                                                                         callback();
                                                                                     }, function(err) {
                                                                                         // All done
                                                                                         console.log(err);
-                                                                                         finalRes.push({h_transactions: totalHTrans});
-                                                                                        res.json(finalRes);
+                                                                                         finalRes["h_transactions"] = totalHTrans;
+
+                                                                                            thisDB.find({ category: "salary" }, function (err, docs) 
+                                                                                                {
+                                                                                                    // docs is an array containing documents Mars, Earth, Jupiter
+                                                                                                    // If no document is found, docs is equal to []
+
+                                                                                                    console.log("salary compute");
+
+                                                                                                        ASYNC.forEachSeries(docs, function(doc, callback) {
+                                                                                                            //doThis(row.axn, row.dnq, row.bgq, callback);
+                                                                                                        console.log(doc.category);
+
+                                                                                                            totalSalary = totalSalary + Math.abs(doc.amount);
+                                                                                                            callback();
+                                                                                                        }, function(err) {
+                                                                                                            // All done
+                                                                                                            console.log(err);
+                                                                                                            finalRes["salary"] = totalSalary;
+
+                                                                                                            var tmp = finalRes["c_transactions"];
+                                                                                                            console.log(tmp);
+
+                                                                                                            
+                                                                                                            var BCH = finalRes["b_transactions"] + finalRes["c_transactions"] + finalRes["h_transactions"];
+                                                                                                            console.log(BCH);
+
+                                                                                                            var spendable = finalRes["salary"] - BCH - finalRes["c_transactions"];
+                                                                                                            console.log(spendable);
+                                                                                                            
+                                                                                                            var weeklySpendable = spendable / 4;
+                                                                                                            
+                                                                                                            res.json({
+                                                                                                                b_transactions: finalRes["b_transactions"], 
+                                                                                                                c_transactions: finalRes["c_transactions"],
+                                                                                                                h_transactions: finalRes["h_transactions"],
+                                                                                                                monthly_spendable: spendable, 
+                                                                                                                weekly_spendable: weeklySpendable});
+                                                                                                            
+                                                                                                        });       
+                                                                                                }); //salary loop closed
                                                                                         
                                                                                     });       
                                                                             }); //third loop closed
