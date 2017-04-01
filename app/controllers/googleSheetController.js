@@ -80,7 +80,12 @@ function fetchJSON(req, res, next) {
                 {
 
                   month = rows[i].datevaleur.split("/")[1];
-                  console.log("month is ", month);
+                  //console.log("month is ", month);
+
+                  //lets get the date object.
+                 
+
+
 
                   if(month === startMonth)
                   {
@@ -93,7 +98,7 @@ function fetchJSON(req, res, next) {
                 }
 
 
-                console.log('starRowNum ' + startRowNum + ' rows');
+                //console.log('starRowNum ' + startRowNum + ' rows');
 
                 //var startMonth = rows[0].datevaleur.split("/")[1];
                 console.log("starting month is ",startMonth);
@@ -107,8 +112,14 @@ function fetchJSON(req, res, next) {
                 for (var i=startRowNum;i<rows.length;) {
 
                     var currMonth = rows[i].datevaleur.split("/")[1];
+                    var day = rows[i].datevaleur.split("/")[0];
+                    var year = rows[i].datevaleur.split("/")[2];
 
-                    //console.log("+++ ", currMonth,lastMonth);
+                    
+
+                    console.log("******* ", currMonth,day, year);
+                 
+
                     if (currMonth > lastMonth && (lastMonth != 0 || lastMonth == 12)) 
                     {
                         count++;
@@ -118,23 +129,37 @@ function fetchJSON(req, res, next) {
 
 
                     var montant = rows[i].montant;
+                    var label = rows[i].libelle;
+                    var labelArr = label.split(/[0-9]+/);
+
+                    var finalArr = labelArr.filter(function(entry) { return entry.trim() != ''; });
+
+                    var paymentLabel = finalArr[0];
+                    var sourceLabel = finalArr[1];
+                    
+
                     var doc = {};
 
                     if (montant > 0) {
                         doc = {
                             month: currMonth,
-                            date: rows[i].datevaleur,
+                            date: day,
                             label: rows[i].libelle,
+                            paymentlabel: paymentLabel,
+                            sourcelabel: sourceLabel,
                             amount: rows[i].montant,
                             value: 1
                         };
 
+                        console.log(doc);
                         dictPositives.push(doc);
                     } else {
                         doc = {
                             month: currMonth,
-                            date: rows[i].datevaleur,
+                            date: day,
                             label: rows[i].libelle,
+                            paymentlabel: paymentLabel,
+                            sourcelabel: sourceLabel,
                             amount: rows[i].montant,
                             value: -1
                         };
